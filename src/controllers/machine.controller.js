@@ -32,3 +32,17 @@ export const getMachines = async (req , res) =>{
         res.status(500).json({ message:  error.message})
     }
 }
+
+
+export const getMachine = async (req, res) => {
+    try{
+        const machine = await Machine.findById(req.params.id)
+
+        if(!machine){
+            return res.status(404).json({ message: "Machine not found"})
+        }
+        res.json(machine)
+    }catch(error) {
+        res.status(400).json({ message: "Invalid machine ID"})
+    }
+}
