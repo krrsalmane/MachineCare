@@ -12,3 +12,23 @@ export const createMachine = async (req ,res) =>{
         res.status(400).json({ message: error.message})
     }
 }
+
+
+export const getMachines = async (req , res) =>{
+    try {
+        const filter = {};
+
+        if(req.query.workshop){
+            filter.workshop = req.query.workshop;
+        }
+
+        if(req.query.status){
+            filter.status = req.query.status
+        }
+
+        const machines = await Machine.find(filter);
+        res.json(machines)
+    }catch (error) {
+        res.status(500).json({ message:  error.message})
+    }
+}
