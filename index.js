@@ -1,30 +1,30 @@
-import express from "express"
-import dotenv from "dotenv"
+import express from "express";
+import dotenv from "dotenv";
 import connectDB from "./src/config/database.js";
-
-
-
-const app = express();
+import authRouter from "./src/routes/auth.routes.js";
+import { seedDefaultUser } from "./src/services/auth.service.js";
+import machineRoutes from "./src/routes/machine.routes.js"
 dotenv.config();
 
+const app = express();
+app.use(express.json());
 
-const PORT = process.env.PORT || 7000 ;
-const MONGO_URL = process.env.MONGO_URL;
+// Routes
+app.use("/api/auth", authRouter);
+app.use("/api/machines" , machineRoutes)
 
+const PORT = process.env.PORT || 8000;
 
-
-connectDB().then(() => {
-
-    console.log("It's connected");
+// Connect Database and Start Server
+connectDB().then(async () => {
+    console.log("Database connected successfully");
+    
+    // Seed default admin if no users exist
+    await seedDefaultUser();
 
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
-
 }).catch((error) => {
-    console.log(error);
+    console.error("Database connection failed:", error);
 });
-
-
-
-
