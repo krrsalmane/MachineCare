@@ -61,3 +61,47 @@ export const registerUser = async (userData) => {
         email: savedUser.email
     };
 };
+
+// 3. Login User
+export const loginUser = async (email, password) => {
+    if (!email || !password) {
+        const error = new Error("Email and password are required");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const user = await User.findOne({
+        email: email.toLowerCase().trim()
+    }).select("+password");
+
+    if (!user) {
+        const error = new Error("Invalid email or password");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+        const error = new Error("Invalid email or password");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    const token = jwt.sign(
+        { userId: user._id.toString() },
+        process.env.JWT_SECRET || "machinecare_jwt_secret_key",
+        { expiresIn: "1d" }
+    );
+
+    return {
+        message: "Login successful",
+        token,
+        user: {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
+        }
+    };
+};
