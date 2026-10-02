@@ -105,3 +105,44 @@ export const loginUser = async (email, password) => {
         }
     };
 };
+
+// 4. Update Profile
+export const updateUserProfile = async (userId, updateData) => {
+    const { firstName, lastName, email, password } = updateData;
+
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) {
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser && existingUser._id.toString() !== userId.toString()) {
+            const error = new Error("Email already registered");
+            error.statusCode = 400;
+            throw error;
+        }
+        user.email = email.toLowerCase();
+    }
+    if (password) {
+        if (password.length < 8) {
+            const error = new Error("Password must contain at least 8 characters");
+            error.statusCode = 400;
+            throw error;
+        }
+        user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    return {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+    };
+};
