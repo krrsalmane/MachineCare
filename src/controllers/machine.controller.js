@@ -46,3 +46,38 @@ export const getMachine = async (req, res) => {
         res.status(400).json({ message: "Invalid machine ID"})
     }
 }
+
+
+export const updateMachine = async (req , res) => {
+
+    try{
+        const machine =  await Machine.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true}
+        )
+        if(!machine){
+            return res.status(404).json({ message: "Machine not found"})
+        }res.json(machine)
+        }
+        catch(error){
+            res.status(400).json({ message: error.message})
+        }
+}
+
+
+
+export const deleteMachine =  async (req, res) =>{
+    try{
+        const machine = await Machine.findByIdAndDelete(req.params.id)
+
+        if(!machine){
+            return res.status(404).json({ message: "Machine not found"})
+        }
+        res.json({message: "Machine deleted successfully"})
+    }
+    catch (error)
+    {
+        res.status(400).json({ message:  error.message})
+    }
+}
